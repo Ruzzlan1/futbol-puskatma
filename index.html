@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Local Football Tournament - Draw System</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+  animation: float 20s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-50px, -50px) rotate(360deg); }
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.layout { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 30px; 
+  align-items: start;
+  padding: 30px;
+}
+
+.pots-section {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pots-section h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.pots { 
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px; 
+}
+
+.pot-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pot-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.pot-card:hover::before {
+  transform: scaleX(1);
+}
+
+.pot-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-color: #4ecdc4;
+}
+
+.pot-card h4 {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.team-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 8px 0;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.team-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(78, 205, 196, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.team-btn:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.team-btn:hover {
+  border-color: #4ecdc4;
+  color: #2c3e50;
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+}
+
+.team-btn:active {
+  transform: scale(0.98);
+}
+
+.team-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.results-section {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.results-section h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.lines {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: white;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.fixture-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f1f3f4;
+  transition: all 0.2s ease;
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.fixture-item:last-child {
+  border-bottom: none;
+}
+
+.fixture-item:hover {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  transform: translateX(5px);
+}
+
+.fixture-item .team-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.fixture-item .team-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+}
+
+.fixture-item .team-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.fixture-item .vs-symbol {
+  color: #6c757d;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin: 0 20px;
+}
+
+.fixture-item .opponent-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.fixture-item .opponent-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.fixture-item .opponent-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.global-fixtures {
+  background: white;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.team-fixture-card {
+  margin: 0;
+  border-bottom: 2px solid #f1f3f4;
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.team-fixture-card:last-child {
+  border-bottom: none;
+}
+
+.team-fixture-card:hover {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  transform: translateX(5px);
+}
+
+.team-fixture-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-radius: 10px 10px 0 0;
+}
+
+.team-fixture-header .team-badge {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.team-fixture-header .team-name {
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.team-fixture-header .opponent-count {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.team-fixture-opponents {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.opponent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.opponent-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-color: #4ecdc4;
+}
+
+.opponent-item .opponent-badge {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+}
+
+.opponent-item .opponent-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.opponent-item .pot-indicator {
+  margin-left: auto;
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Animation delays for fixture items */
+.fixture-item:nth-child(1) { animation-delay: 0.1s; }
+.fixture-item:nth-child(2) { animation-delay: 0.2s; }
+.fixture-item:nth-child(3) { animation-delay: 0.3s; }
+.fixture-item:nth-child(4) { animation-delay: 0.4s; }
+.fixture-item:nth-child(5) { animation-delay: 0.5s; }
+.fixture-item:nth-child(6) { animation-delay: 0.6s; }
+
+.team-fixture-card:nth-child(1) { animation-delay: 0.1s; }
+.team-fixture-card:nth-child(2) { animation-delay: 0.2s; }
+.team-fixture-card:nth-child(3) { animation-delay: 0.3s; }
+.team-fixture-card:nth-child(4) { animation-delay: 0.4s; }
+.team-fixture-card:nth-child(5) { animation-delay: 0.5s; }
+
+hr {
+  margin: 25px 0;
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4ecdc4, transparent);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #45b7d1, #4ecdc4);
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #4ecdc4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success Animation */
+.success-animation {
+  animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .pots { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 768px) {
+  .layout { 
+    grid-template-columns: 1fr; 
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .pots { 
+    grid-template-columns: 1fr; 
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .header p {
+    font-size: 1rem;
+  }
+  
+  .team-fixture-opponents {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>⚽ Local Football Tournament</h1>
+    <p>Click on any team to draw them and automatically assign 6 opponents from different pots. Each team gets exactly one opponent from each pot.</p>
+  </div>
+
+  <div class="layout">
+    <div class="pots-section">
+      <h3>🏆 Tournament Pots</h3>
+      <div id="potsContainer" class="pots"></div>
+    </div>
+    
+    <div class="results-section">
+      <h3>📋 Selected Team's Opponents <span class="pill" id="selectedTeamPill">none</span></h3>
+      <div id="selectedTeamOutput" class="lines"></div>
+      
+      <hr>
+      
+      <h3>🌍 Global Fixtures</h3>
+      <div id="globalFixtures" class="global-fixtures"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const manualTeamNames = [
+  // Səbət 1
+  ["Logistika", "Spirtli İçkilər", "Tamstore Satış", "Maliyyə 1", "Təhlükəsizlik", "Bizon Enerji"],
+  // Səbət 2
+  ["İstehsalçı", "Tamstore Ofis", "Old City Ganja", "Xırdalan", "SPL", "Nəqliyyat 2"],
+  // Səbət 3
+  ["Keyfiyyət", "Dev Ops", "Marketinq", "İdxal və Ticarı mallar", "Satışa Nəzarət", "Maliyyə 2"],
+  // Səbət 4
+  ["Təmir-Tikinti", "Pivə anbarı", "Alcopoint", "Mərkəz Satış Anbarı", "Süd Team", "Satışın İnkişafı Dep."],
+  // Səbət 5
+  ["OVEN", "Fabrist", "İdxal Region", "Daxili Nəzarət Tamstore", "Tamstore Tornado", "Zforce"],
+  // Səbət 6
+  ["Lənkəran", "Göyçay", "Qarabağ Bərdə", "Saatlı", "Şahdağ Quba", "Şəki"]
+];
+
+
+const pots = [];
+const originalPots = [];
+const teamToPot = new Map();
+let teamCounter = 1;
+
+// initialize 6 pots with 6 teams each
+for (let p = 0; p < manualTeamNames.length; p++) {
+  const pot = manualTeamNames[p];
+  pots.push([...pot]); // for dynamic drawing
+  originalPots.push([...pot]); // for reference
+  for (let team of pot) {
+    teamToPot.set(team, p);
+  }
+}
+
+// fixtures: team -> Set of opponents
+const fixtures = new Map();
+// selectedTeams: Set of teams that have been explicitly selected by user
+const selectedTeams = new Set();
+
+function ensureTeam(t){ if(!fixtures.has(t)) fixtures.set(t, new Set()); }
+
+// Returns true if the given team already has at least one opponent
+// whose pot index equals potIndexToCheck
+function teamHasOpponentFromPot(teamName, potIndexToCheck){
+  if(!fixtures.has(teamName)) return false;
+  for(const opponent of fixtures.get(teamName)){
+    if(teamToPot.get(opponent) === potIndexToCheck){
+      return true;
+    }
+  }
+  return false;
+}
+
+// symmetric fixture
+function addFixture(a, b, potA, potB){
+  ensureTeam(a); ensureTeam(b);
+  fixtures.get(a).add(b);
+  fixtures.get(b).add(a);
+}
+
+const potsContainer = document.getElementById('potsContainer');
+const selectedTeamOutput = document.getElementById('selectedTeamOutput');
+const selectedTeamPill = document.getElementById('selectedTeamPill');
+const globalFixturesDiv = document.getElementById('globalFixtures');
+
+function renderPots(){
+  potsContainer.innerHTML='';
+  for(let p=0; p<pots.length; p++){
+    const card=document.createElement('div'); 
+    card.className='pot-card';
+    card.innerHTML=`<h4>Pot ${p+1}</h4>`;
+    
+    pots[p].forEach(team=>{
+      const btn=document.createElement('button');
+      btn.className='team-btn';
+      btn.textContent=team;
+      btn.onclick=()=>selectTeam(team);
+      card.appendChild(btn);
+    });
+    potsContainer.appendChild(card);
+  }
+}
+
+function randomPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function renderGlobalFixtures(){
+  const lines = [];
+  
+  // Show only the teams that have been explicitly selected by the user
+  const sortedSelectedTeams = Array.from(selectedTeams).sort();
+  
+  sortedSelectedTeams.forEach(team => {
+    const opponents = Array.from(fixtures.get(team)).sort();
+    const opponentList = opponents.join(', ');
+    
+    // Create team fixture card
+    const teamCard = document.createElement('div');
+    teamCard.className = 'team-fixture-card';
+    
+    // Create header with team info
+    const header = document.createElement('div');
+    header.className = 'team-fixture-header';
+    
+    const teamBadge = document.createElement('div');
+    teamBadge.className = 'team-badge';
+    teamBadge.textContent = team.split(' ')[1]; // Extract team number
+    
+    const teamName = document.createElement('div');
+    teamName.className = 'team-name';
+    teamName.textContent = team;
+    
+    const opponentCount = document.createElement('div');
+    opponentCount.className = 'opponent-count';
+    opponentCount.textContent = `${opponents.length} opponents`;
+    
+    header.appendChild(teamBadge);
+    header.appendChild(teamName);
+    header.appendChild(opponentCount);
+    
+    // Create opponents grid
+    const opponentsGrid = document.createElement('div');
+    opponentsGrid.className = 'team-fixture-opponents';
+    
+    opponents.forEach(opponent => {
+      const opponentItem = document.createElement('div');
+      opponentItem.className = 'opponent-item';
+      
+      const opponentBadge = document.createElement('div');
+      opponentBadge.className = 'opponent-badge';
+      opponentBadge.textContent = opponent.split(' ')[1]; // Extract team number
+      
+      const opponentName = document.createElement('div');
+      opponentName.className = 'opponent-name';
+      opponentName.textContent = opponent;
+      
+      const potIndicator = document.createElement('div');
+      potIndicator.className = 'pot-indicator';
+      potIndicator.textContent = `Pot ${teamToPot.get(opponent) + 1}`;
+      
+      opponentItem.appendChild(opponentBadge);
+      opponentItem.appendChild(opponentName);
+      opponentItem.appendChild(potIndicator);
+      
+      opponentsGrid.appendChild(opponentItem);
+    });
+    
+    teamCard.appendChild(header);
+    teamCard.appendChild(opponentsGrid);
+    lines.push(teamCard);
+  });
+  
+  globalFixturesDiv.innerHTML = '';
+  lines.forEach(line => globalFixturesDiv.appendChild(line));
+}
+
+function selectTeam(team){
+  const pot = teamToPot.get(team);
+  if(pot === undefined) return;
+
+  // Add loading animation
+  const teamBtn = event.target;
+  teamBtn.innerHTML = '<span class="loading"></span>';
+  teamBtn.disabled = true;
+
+  // Simulate processing time for better UX
+  setTimeout(() => {
+    // remove only the physically drawn team
+    const idx = pots[pot].indexOf(team);
+    if(idx !== -1) pots[pot].splice(idx,1);
+    renderPots();
+
+    // Mark this team as selected
+    selectedTeams.add(team);
+    
+    ensureTeam(team);
+    const lines=[];
+
+    // Always ensure the team gets 6 opponents (one from each pot)
+    for(let p=0; p<6; p++){
+      // check if team already has an opponent from this pot
+      const existingOpp = Array.from(fixtures.get(team)).find(x => teamToPot.get(x) === p);
+      if(existingOpp){
+        lines.push(`${team} - ${existingOpp}`);
+        continue;
+      }
+
+      // pick candidate from pot p not already paired with this team
+      // and ensure the candidate does not already have an opponent from the
+      // current team's pot. This guarantees everyone max 1 opponent per pot.
+      const candidates = originalPots[p].filter(candidateTeam => {
+        if(candidateTeam === team) return false;
+        if(fixtures.get(team).has(candidateTeam)) return false;
+        // Prevent candidate already having an opponent from the pot of "team"
+        const teamPotIndex = teamToPot.get(team);
+        if(teamHasOpponentFromPot(candidateTeam, teamPotIndex)) return false;
+        return true;
+      });
+      
+      if(candidates.length===0) continue;
+
+      const opp = randomPick(candidates);
+      addFixture(team, opp, p, teamToPot.get(opp));
+      lines.push(`${team} - ${opp}`);
+    }
+
+    lines.sort((a,b)=>a.localeCompare(b));
+    selectedTeamPill.textContent = team;
+    
+    // Render selected team opponents in UECL style
+    selectedTeamOutput.innerHTML = '';
+    lines.forEach(fixture => {
+      const [teamName, opponentName] = fixture.split(' - ');
+      
+      const fixtureItem = document.createElement('div');
+      fixtureItem.className = 'fixture-item';
+      
+      const teamInfo = document.createElement('div');
+      teamInfo.className = 'team-info';
+      
+      const teamBadge = document.createElement('div');
+      teamBadge.className = 'team-badge';
+      teamBadge.textContent = teamName.split(' ')[1];
+      
+      const teamNameDiv = document.createElement('div');
+      teamNameDiv.className = 'team-name';
+      teamNameDiv.textContent = teamName;
+      
+      teamInfo.appendChild(teamBadge);
+      teamInfo.appendChild(teamNameDiv);
+      
+      const vsSymbol = document.createElement('div');
+      vsSymbol.className = 'vs-symbol';
+      vsSymbol.textContent = 'VS';
+      
+      const opponentInfo = document.createElement('div');
+      opponentInfo.className = 'opponent-info';
+      
+      const opponentBadge = document.createElement('div');
+      opponentBadge.className = 'opponent-badge';
+      opponentBadge.textContent = opponentName.split(' ')[1];
+      
+      const opponentNameDiv = document.createElement('div');
+      opponentNameDiv.className = 'opponent-name';
+      opponentNameDiv.textContent = opponentName;
+      
+      opponentInfo.appendChild(opponentBadge);
+      opponentInfo.appendChild(opponentNameDiv);
+      
+      fixtureItem.appendChild(teamInfo);
+      fixtureItem.appendChild(vsSymbol);
+      fixtureItem.appendChild(opponentInfo);
+      
+      selectedTeamOutput.appendChild(fixtureItem);
+    });
+
+    // Add success animation
+    selectedTeamOutput.classList.add('success-animation');
+    setTimeout(() => selectedTeamOutput.classList.remove('success-animation'), 600);
+
+    renderGlobalFixtures();
+  }, 500);
+}
+
+renderPots();
+</script>
+</body>
+</html>
