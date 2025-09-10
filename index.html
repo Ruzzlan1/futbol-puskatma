@@ -660,7 +660,7 @@
       </div>
 
       <div class="results-section">
-        <h3>📋 Seçilmiş komandanın rəqibləri <span class="pill" id="selectedTeamPill">none</span></h3>
+        <h3>📋 Seçilmiş komandanın rəqibləri <span class="pill" id="selectedTeamPill"></span></h3>
         <div id="selectedTeamOutput" class="lines"></div>
 
         <hr>
@@ -982,7 +982,7 @@
 
   // 1. Add button dynamically (or you can place it in HTML directly)
   const finalBtn = document.createElement("button");
-  finalBtn.textContent = "🏆 Show Final Result";
+  finalBtn.textContent = "🏆 Nəticəni göstər";
   finalBtn.className = "team-btn"; 
   document.body.appendChild(finalBtn); // put it at bottom, or append somewhere else
     
@@ -1012,62 +1012,6 @@ overlay.innerHTML = `
 
 document.body.appendChild(overlay);
 
-// 3. Render function
-// function renderFinalDraw() {
-//   const grid = document.getElementById("finalDrawGrid");
-//   grid.innerHTML = "";
-//   fixtures.forEach((opponents, team) => {
-//     const potDiv = document.createElement("div");
-//     potDiv.style.cssText = "background:#1a1a1a;padding:10px;border-radius:8px;";
-
-//     // console.log("teamToPot", teamToPot)
-//     const title = document.createElement("h2");
-//     title.textContent = team;
-//     title.style.cssText = "text-align:center;color:#0f0;";
-//     potDiv.appendChild(title);
-
-//     opponents.forEach(op => {
-//       const row = document.createElement("div");
-//       row.style.cssText = "display:flex;align-items:center;gap:8px;margin:5px 0;";
-
-//       const logo = document.createElement("img");
-//       console.log("each teams pot", teamToPot)
-      
-//       const grouped = Array.from(teamToPot.entries()).reduce((acc,[key,value]) => {
-//         if (!acc[value]) acc[value]  = [];
-//         acc[value].push(key);
-//         return acc
-//       }, {});
-      
-//       // console.log("result",Object.entries(grouped))
-
-//       const result = Object.entries(grouped).map(([value,teams]) => ({
-//         pot : Number(value) + 1,
-//         teams,
-//       }));
-
-//       console.log("result", result)  
-
-
-//       logo.src = `logos/${op}.png`;
-//       logo.alt = op;
-//       logo.style.cssText = "width:20px;height:20px;object-fit:contain;";
-//       logo.onerror = () => { logo.src = `logos/${op}.jpeg`; };
-
-//       const name = document.createElement("span");
-//       name.textContent = op;
-//       const pot = document.createElement('span')
-//       pot.textContent = `Pot ${teamToPot.get(op) + 1}`
-
-//       row.appendChild(logo);
-//       row.appendChild(name);
-//       row.appendChild(pot);
-//       potDiv.appendChild(row);
-//     });
-
-//     grid.appendChild(potDiv);
-//   });
-// }
 
 
 function renderFinalDraw() {
