@@ -763,7 +763,7 @@
       sortedSelectedTeams.forEach(team => {
         const opponents = Array.from(fixtures.get(team)).sort();
         const opponentList = opponents.join(', ');
-
+        console.log("fixtures",fixtures)
         // Create team fixture card
         const teamCard = document.createElement('div');
         teamCard.className = 'team-fixture-card';
@@ -848,6 +848,7 @@
 
       globalFixturesDiv.innerHTML = '';
       lines.forEach(line => globalFixturesDiv.appendChild(line));
+      console.log("final result", lines)
     }
 
     function selectTeam(team) {
@@ -972,10 +973,205 @@
         setTimeout(() => selectedTeamOutput.classList.remove('success-animation'), 600);
 
         renderGlobalFixtures();
+
       }, 500);
     }
 
     renderPots();
+
+
+  // 1. Add button dynamically (or you can place it in HTML directly)
+  const finalBtn = document.createElement("button");
+  finalBtn.textContent = "🏆 Show Final Result";
+  finalBtn.className = "team-btn"; 
+  document.body.appendChild(finalBtn); // put it at bottom, or append somewhere else
+    
+// 2. Add overlay container (hidden by default)
+const overlay = document.createElement("div");
+overlay.id = "finalOverlay";
+overlay.style.cssText = `
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.95); color:white;
+  display:none; justify-content:center; align-items:flex-start;
+  z-index:1000; overflow:auto; padding:20px;
+`;
+
+overlay.innerHTML = `
+  <div style="width:100%; max-width:none;">
+    <button id="closeOverlay" style="
+      float:right;
+      padding:6px 12px;
+      background:red;color:white;
+      border:none;border-radius:4px;
+      cursor:pointer
+    ">X</button>
+    <h1 style="text-align:center;margin:20px 0;">Final Draw</h1>
+    <div id="finalDrawGrid" style="width:100%;"></div>
+  </div>
+`;
+
+document.body.appendChild(overlay);
+
+// 3. Render function
+// function renderFinalDraw() {
+//   const grid = document.getElementById("finalDrawGrid");
+//   grid.innerHTML = "";
+//   fixtures.forEach((opponents, team) => {
+//     const potDiv = document.createElement("div");
+//     potDiv.style.cssText = "background:#1a1a1a;padding:10px;border-radius:8px;";
+
+//     // console.log("teamToPot", teamToPot)
+//     const title = document.createElement("h2");
+//     title.textContent = team;
+//     title.style.cssText = "text-align:center;color:#0f0;";
+//     potDiv.appendChild(title);
+
+//     opponents.forEach(op => {
+//       const row = document.createElement("div");
+//       row.style.cssText = "display:flex;align-items:center;gap:8px;margin:5px 0;";
+
+//       const logo = document.createElement("img");
+//       console.log("each teams pot", teamToPot)
+      
+//       const grouped = Array.from(teamToPot.entries()).reduce((acc,[key,value]) => {
+//         if (!acc[value]) acc[value]  = [];
+//         acc[value].push(key);
+//         return acc
+//       }, {});
+      
+//       // console.log("result",Object.entries(grouped))
+
+//       const result = Object.entries(grouped).map(([value,teams]) => ({
+//         pot : Number(value) + 1,
+//         teams,
+//       }));
+
+//       console.log("result", result)  
+
+
+//       logo.src = `logos/${op}.png`;
+//       logo.alt = op;
+//       logo.style.cssText = "width:20px;height:20px;object-fit:contain;";
+//       logo.onerror = () => { logo.src = `logos/${op}.jpeg`; };
+
+//       const name = document.createElement("span");
+//       name.textContent = op;
+//       const pot = document.createElement('span')
+//       pot.textContent = `Pot ${teamToPot.get(op) + 1}`
+
+//       row.appendChild(logo);
+//       row.appendChild(name);
+//       row.appendChild(pot);
+//       potDiv.appendChild(row);
+//     });
+
+//     grid.appendChild(potDiv);
+//   });
+// }
+
+
+function renderFinalDraw() {
+  const grid = document.getElementById("finalDrawGrid");
+  grid.innerHTML = "";
+
+  // Opponent pots
+  const opponentPots = new Set();
+  fixtures.forEach(opps => opps.forEach(op => opponentPots.add(teamToPot.get(op))));
+  const sortedPots = Array.from(opponentPots).sort((a,b)=>a-b);
+
+  // Grid container
+  const table = document.createElement("div");
+  table.style.cssText = `
+    display: grid;
+    grid-template-columns: 200px repeat(${sortedPots.length}, 1fr);
+    gap: 5px;
+    width: 100%;
+    min-width: 600px;
+  `;
+
+  // Header row
+  const emptyHeader = document.createElement("div");
+  emptyHeader.textContent = "Komanda / Rəqib";
+  emptyHeader.style.cssText = "background:#111;color:#0f0;font-weight:bold;padding:10px;text-align:center;";
+  table.appendChild(emptyHeader);
+
+  sortedPots.forEach(potNum => {
+    const th = document.createElement("div");
+    th.textContent = `Səbət ${potNum + 1}`;
+    th.style.cssText = "background:#222;color:#0f0;font-weight:bold;padding:10px;text-align:center;";
+    table.appendChild(th);
+  });
+
+  // Group teams by their pot
+  const teamsByPot = {};
+  Array.from(teamToPot.entries()).forEach(([team, pot]) => {
+    if (!teamsByPot[pot]) teamsByPot[pot] = [];
+    teamsByPot[pot].push(team);
+  });
+  const sortedTeamPots = Object.keys(teamsByPot).sort((a,b)=>a-b);
+
+  // Body rows: Pot header row + team rows
+  sortedTeamPots.forEach(potNum => {
+    // Pot label row (spans full left column)
+    const potHeader = document.createElement("div");
+    potHeader.textContent = `Səbət ${Number(potNum)+1}`;
+    potHeader.style.cssText = `
+      background:#222;color:#0f0;font-weight:bold;
+      padding:10px;text-align:left;
+      grid-column: 1 / 2;`;
+    table.appendChild(potHeader);
+
+    // Empty cells for opponent columns for the pot header
+    sortedPots.forEach(() => {
+      const emptyCell = document.createElement("div");
+      emptyCell.style.cssText = "background:#111;";
+      table.appendChild(emptyCell);
+    });
+
+    // Team rows
+    teamsByPot[potNum].forEach(team => {
+      // Team name cell
+      const teamCell = document.createElement("div");
+      teamCell.textContent = team;
+      teamCell.style.cssText = "background:#111;color:#0ff;font-weight:bold;padding:10px;text-align:left;";
+      table.appendChild(teamCell);
+
+      // Opponent cells
+      sortedPots.forEach(opPot => {
+        const cell = document.createElement("div");
+        cell.style.cssText = "background:#1a1a1a;padding:10px;border:1px solid #333;";
+
+        const opponents = fixtures.get(team) || new Set();
+        const opsInThisPot = Array.from(opponents).filter(op => teamToPot.get(op) === opPot);
+
+        opsInThisPot.forEach(op => {
+          const span = document.createElement("span");
+          span.textContent = op;
+          span.style.cssText = "display:block;color:#0ff;margin:2px 0;";
+          cell.appendChild(span);
+        });
+
+        table.appendChild(cell);
+      });
+    });
+  });
+
+  grid.appendChild(table);
+  grid.style.overflowX = "auto";
+}
+
+
+
+// 4. Event listeners
+finalBtn.addEventListener("click", () => {
+  renderFinalDraw();
+  overlay.style.display = "flex";
+});
+document.getElementById("closeOverlay").addEventListener("click", () => {
+  overlay.style.display = "none";
+});
+
+
   </script>
 </body>
 
