@@ -1005,7 +1005,7 @@ overlay.innerHTML = `
       border:none;border-radius:4px;
       cursor:pointer
     ">X</button>
-    <h1 style="text-align:center;margin:20px 0;">Final Draw</h1>
+    <h1 style="text-align:center;margin:20px 0;">Püşkatma nəticəsi</h1>
     <div id="finalDrawGrid" style="width:100%;"></div>
   </div>
 `;
@@ -1041,12 +1041,12 @@ function renderFinalDraw() {
 
   sortedPots.forEach(potNum => {
     const th = document.createElement("div");
-    th.textContent = `Səbət ${potNum + 1}`;
+    th.textContent = `Pot ${potNum + 1}`;
     th.style.cssText = "background:#222;color:#0f0;font-weight:bold;padding:10px;text-align:center;";
     table.appendChild(th);
   });
 
-  // Group teams by their pot
+  // Group teams by pot
   const teamsByPot = {};
   Array.from(teamToPot.entries()).forEach(([team, pot]) => {
     if (!teamsByPot[pot]) teamsByPot[pot] = [];
@@ -1054,18 +1054,18 @@ function renderFinalDraw() {
   });
   const sortedTeamPots = Object.keys(teamsByPot).sort((a,b)=>a-b);
 
-  // Body rows: Pot header row + team rows
+  // Body rows
   sortedTeamPots.forEach(potNum => {
-    // Pot label row (spans full left column)
+    // Pot header row
     const potHeader = document.createElement("div");
-    potHeader.textContent = `Səbət ${Number(potNum)+1}`;
+    potHeader.textContent = `Pot ${Number(potNum)+1}`;
     potHeader.style.cssText = `
       background:#222;color:#0f0;font-weight:bold;
-      padding:10px;text-align:left;
-      grid-column: 1 / 2;`;
+      padding:10px;text-align:left; grid-column:1 / 2;
+    `;
     table.appendChild(potHeader);
 
-    // Empty cells for opponent columns for the pot header
+    // Empty opponent cells for pot header
     sortedPots.forEach(() => {
       const emptyCell = document.createElement("div");
       emptyCell.style.cssText = "background:#111;";
@@ -1074,13 +1074,25 @@ function renderFinalDraw() {
 
     // Team rows
     teamsByPot[potNum].forEach(team => {
-      // Team name cell
+      // Team cell with logo
       const teamCell = document.createElement("div");
-      teamCell.textContent = team;
-      teamCell.style.cssText = "background:#111;color:#0ff;font-weight:bold;padding:10px;text-align:left;";
+      teamCell.style.cssText = "background:#111;color:#0ff;font-weight:bold;padding:10px;text-align:left;display:flex;align-items:center;gap:6px;";
+
+      const logo = document.createElement("img");
+      logo.src = `logos/${team}.png`;
+      logo.alt = team;
+      logo.style.cssText = "width:20px;height:20px;object-fit:contain;";
+      logo.onerror = () => { logo.src = `logos/${team}.jpeg`; };
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = team;
+      nameSpan.style.fontSize = '14px';
+
+      teamCell.appendChild(logo);
+      teamCell.appendChild(nameSpan);
       table.appendChild(teamCell);
 
-      // Opponent cells
+      // Opponent cells with logos
       sortedPots.forEach(opPot => {
         const cell = document.createElement("div");
         cell.style.cssText = "background:#1a1a1a;padding:10px;border:1px solid #333;";
@@ -1089,10 +1101,23 @@ function renderFinalDraw() {
         const opsInThisPot = Array.from(opponents).filter(op => teamToPot.get(op) === opPot);
 
         opsInThisPot.forEach(op => {
-          const span = document.createElement("span");
-          span.textContent = op;
-          span.style.cssText = "display:block;color:#0ff;margin:2px 0;";
-          cell.appendChild(span);
+          const opContainer = document.createElement("div");
+          opContainer.style.cssText = "display:flex;align-items:center;gap:4px;margin:2px 0;";
+
+          const opLogo = document.createElement("img");
+          opLogo.src = `logos/${op}.png`;
+          opLogo.alt = op;
+          opLogo.style.cssText = "width:25px;height:25px;object-fit:contain;";
+          opLogo.onerror = () => { opLogo.src = `logos/${op}.jpeg`; };
+
+          const opName = document.createElement("span");
+          opName.textContent = op;
+          opName.style.color = "#0ff";
+          opName.style.fontSize = '13px'
+
+          opContainer.appendChild(opLogo);
+          opContainer.appendChild(opName);
+          cell.appendChild(opContainer);
         });
 
         table.appendChild(cell);
@@ -1103,8 +1128,6 @@ function renderFinalDraw() {
   grid.appendChild(table);
   grid.style.overflowX = "auto";
 }
-
-
 
 // 4. Event listeners
 finalBtn.addEventListener("click", () => {
