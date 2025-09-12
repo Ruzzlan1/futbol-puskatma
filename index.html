@@ -20,7 +20,7 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 2600px;
       margin: 0 auto;
       background: rgba(255, 255, 255, 0.95);
       border-radius: 20px;
@@ -648,6 +648,49 @@
         transform: translateX(0);
       }
     }
+
+    /* Popup redesign */
+    .popup-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 16px 18px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .popup-header .team-badge {
+      width: 46px; height: 46px; border-radius: 50%;
+      overflow: hidden; background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.35);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .popup-header .team-name {
+      font-size: 20px; font-weight: 700; color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .popup-header .opponent-count {
+      margin-left: auto; background: rgba(255,255,255,0.2);
+      padding: 6px 12px; border-radius: 999px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+    .popup-opponents {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .popup-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-radius: 12px;
+      background: linear-gradient(145deg, #ffffff, #f6f7fb);
+      border: 1px solid #e6e8ef;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .popup-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: #4ecdc4; }
+    .popup-card .team-badge { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(0,0,0,0.06); background: #fff; display:flex; align-items:center; justify-content:center; }
+    .popup-card .name { font-weight: 700; color: #2c3e50; }
+    .popup-card .pill { margin-left: auto; background: #eafaf7; color: #0b8f7a; padding: 6px 10px; border-radius: 999px; font-size: 12px; border: 1px solid #b8efe6; box-shadow: none; animation: none; }
   </style>
 </head>
 
@@ -842,7 +885,7 @@
         // teamBadge.textContent = team.split(' ')[1]; // Extract team number
 
         const logo = document.createElement("img")
-        logo.src = `logos/${team}.png`;
+        logo.src = `yeni-logolar/${team}.png`;
         logo.alt = team;
         logo.className = 'team-logo'
 
@@ -854,7 +897,7 @@
 
         const opponentCount = document.createElement('div');
         opponentCount.className = 'opponent-count';
-        opponentCount.textContent = `${opponents.length} opponents`;
+        opponentCount.textContent = `${opponents.length} rəqib`;
 
         header.appendChild(teamBadge);
         header.appendChild(teamName);
@@ -869,7 +912,7 @@
           badge.className = "team-badge";
 
           const img = document.createElement("img");
-          img.src = `logos/${team}.png`;
+          img.src = `yeni-logolar/${team}.png`;
           img.alt = team;
           img.className = "team-logo";
 
@@ -897,7 +940,7 @@
 
           const potIndicator = document.createElement('div');
           potIndicator.className = 'pot-indicator';
-          potIndicator.textContent = `Pot ${teamToPot.get(opponent) + 1}`;
+          potIndicator.textContent = `Səbət ${teamToPot.get(opponent) + 1}`;
 
           opponentItem.appendChild(opponentBadge);
           opponentItem.appendChild(opponentName);
@@ -980,69 +1023,41 @@
         // Render selected team opponents into popup
         const teamOverlayContent = document.getElementById('teamOverlayContent');
         const teamOverlayTitle = document.getElementById('teamOverlayTitle');
+        const headerLogo = document.getElementById('popupHeaderLogo');
+        const oppCount = document.getElementById('popupOppCount');
         teamOverlayTitle.textContent = team;
+        headerLogo.src = `yeni-logolar/${team}.png`;
+        headerLogo.alt = team;
         teamOverlayContent.innerHTML = '';
         lines.forEach(fixture => {
           const [teamName, opponentName] = fixture.split(' - ');
 
-          const fixtureItem = document.createElement('div');
-          fixtureItem.className = 'fixture-item';
-
-          const teamInfo = document.createElement('div');
-          teamInfo.className = 'team-info';
-
-
-          const teamBadge = document.createElement('div');
-          teamBadge.className = 'team-badge';
-          // teamBadge.textContent = teamName.split(' ')[1];
-
-          const logo = document.createElement("img")
-          logo.src = `logos/${team}.png`;
-          logo.alt = team;
-          logo.className = 'team-logo'
-
-          teamBadge.appendChild(logo)
-
-
-          const teamNameDiv = document.createElement('div');
-          teamNameDiv.className = 'team-name';
-          teamNameDiv.textContent = teamName;
-
-          teamInfo.appendChild(teamBadge);
-          teamInfo.appendChild(teamNameDiv);
-
-          const vsSymbol = document.createElement('div');
-          vsSymbol.className = 'vs-symbol';
-          vsSymbol.textContent = 'VS';
-
-          const opponentInfo = document.createElement('div');
-          opponentInfo.className = 'opponent-info';
+          const card = document.createElement('div');
+          card.className = 'popup-card';
 
           const opponentBadge = document.createElement('div');
-          opponentBadge.className = 'opponent-badge';
-          // opponentBadge.textContent = opponentName.split(' ')[1];
-
-
-          const logoOp = document.createElement("img")
-          logoOp.src = `logos/${opponentName}.png`;
+          opponentBadge.className = 'team-badge';
+          const logoOp = document.createElement('img');
+          logoOp.src = `yeni-logolar/${opponentName}.png`;
           logoOp.alt = opponentName;
-          logoOp.className = 'team-logo'
+          logoOp.className = 'team-logo';
+          opponentBadge.appendChild(logoOp);
 
-          opponentBadge.appendChild(logoOp)
+          const nameDiv = document.createElement('div');
+          nameDiv.className = 'name';
+          nameDiv.textContent = opponentName;
 
-          const opponentNameDiv = document.createElement('div');
-          opponentNameDiv.className = 'opponent-name';
-          opponentNameDiv.textContent = opponentName;
+          const potPill = document.createElement('div');
+          potPill.className = 'pill';
+          potPill.textContent = `Səbət ${teamToPot.get(opponentName) + 1}`;
 
-          opponentInfo.appendChild(opponentBadge);
-          opponentInfo.appendChild(opponentNameDiv);
+          card.appendChild(opponentBadge);
+          card.appendChild(nameDiv);
+          card.appendChild(potPill);
 
-          fixtureItem.appendChild(teamInfo);
-          fixtureItem.appendChild(vsSymbol);
-          fixtureItem.appendChild(opponentInfo);
-
-          teamOverlayContent.appendChild(fixtureItem);
+          teamOverlayContent.appendChild(card);
         });
+        oppCount.textContent = `${lines.length} rəqib`;
 
         // Show popup
         teamOverlay.style.display = 'flex';
@@ -1079,7 +1094,7 @@ overlay.style.cssText = `
 `;
 
 overlay.innerHTML = `
-  <div style="width:100%; max-width:1200px; margin:0 auto;">
+  <div style="width:100%; margin:0 auto;">
     <button id="closeOverlay" style="
       float:right;
       padding:6px 12px;
@@ -1107,11 +1122,13 @@ teamOverlay.style.cssText = `
 
 teamOverlay.innerHTML = `
   <div style="background:#ffffff; color:#222; border-radius:14px; padding:20px; width:min(900px,95vw); max-height:85vh; overflow:auto;">
-    <div style=\"display:flex; align-items:center; gap:10px; margin-bottom:12px;\">
-      <h2 id=\"teamOverlayTitle\" style=\"flex:1; margin:0;\">Komanda</h2>
-      <button id=\"closeTeamOverlay\" style=\"padding:6px 12px; background:#dc3545; color:#fff; border:none; border-radius:6px; cursor:pointer;\">Bağla</button>
+    <div class=\"popup-header\">
+      <div class=\"team-badge\"><img id=\"popupHeaderLogo\" src=\"\" alt=\"\" style=\"width:100%;height:100%;object-fit:cover;\"/></div>
+      <div class=\"team-name\" id=\"teamOverlayTitle\">Komanda</div>
+      <div class=\"opponent-count\" id=\"popupOppCount\">0 opponents</div>
+      <button id=\"closeTeamOverlay\" style=\"margin-left:12px;padding:6px 12px; background:#dc3545; color:#fff; border:none; border-radius:6px; cursor:pointer;\">Bağla</button>
     </div>
-    <div id=\"teamOverlayContent\" class=\"lines\" style=\"display:block; max-height:none;\"></div>
+    <div id=\"teamOverlayContent\" class=\"popup-opponents\"></div>
   </div>
 `;
 document.body.appendChild(teamOverlay);
@@ -1149,13 +1166,13 @@ function renderFinalDraw() {
   // Header row
   const emptyHeader = document.createElement("div");
   emptyHeader.textContent = "Komanda / Rəqib";
-  emptyHeader.style.cssText = "background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:12px;border-top:3px solid #27ae60;";
+  emptyHeader.style.cssText = "background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid #27ae60;";
   table.appendChild(emptyHeader);
 
   sortedPots.forEach((potNum, idx) => {
     const th = document.createElement("div");
-    th.textContent = `Pot ${potNum + 1}`;
-    th.style.cssText = `background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:12px;border-top:3px solid ${potColors[idx % potColors.length]};`;
+    th.textContent = `Səbət ${potNum + 1}`;
+    th.style.cssText = `background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid ${potColors[idx % potColors.length]};`;
     table.appendChild(th);
   });
 
@@ -1171,7 +1188,7 @@ function renderFinalDraw() {
   sortedTeamPots.forEach(potNum => {
     // Pot header row
     const potHeader = document.createElement("div");
-    potHeader.textContent = `Pot ${Number(potNum)+1}`;
+    potHeader.textContent = `Səbət ${Number(potNum)+1}`;
     potHeader.style.cssText = `
       background:#1e6f34;color:#ffffff;font-weight:700;
       padding:6px 8px;text-align:left; grid-column:1 / 2; font-size:12px;
@@ -1192,10 +1209,10 @@ function renderFinalDraw() {
       teamCell.style.cssText = "background:#121212;color:#b6f0ff;font-weight:700;padding:8px;text-align:left;display:flex;align-items:center;gap:6px;font-size:12px;";
 
       const logo = document.createElement("img");
-      logo.src = `logos/${team}.png`;
+      logo.src = `yeni-logolar/${team}.png`;
       logo.alt = team;
       logo.style.cssText = "width:16px;height:16px;object-fit:contain;";
-      logo.onerror = () => { logo.src = `logos/${team}.jpeg`; };
+      logo.onerror = () => { logo.src = `yeni-logolar/${team}.jpeg`; };
 
       const nameSpan = document.createElement("span");
       nameSpan.textContent = team;
@@ -1218,10 +1235,10 @@ function renderFinalDraw() {
           opContainer.style.cssText = "display:flex;align-items:center;gap:4px;margin:2px 0;";
 
           const opLogo = document.createElement("img");
-          opLogo.src = `logos/${op}.png`;
+          opLogo.src = `yeni-logolar/${op}.png`;
           opLogo.alt = op;
           opLogo.style.cssText = "width:18px;height:18px;object-fit:contain;";
-          opLogo.onerror = () => { opLogo.src = `logos/${op}.jpeg`; };
+          opLogo.onerror = () => { opLogo.src = `yeni-logolar/${op}.jpeg`; };
 
           const opName = document.createElement("span");
           opName.textContent = op;
