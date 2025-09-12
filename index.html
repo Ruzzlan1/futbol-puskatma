@@ -1106,6 +1106,13 @@ overlay.innerHTML = `
       border:none;border-radius:4px;
       cursor:pointer
     ">X</button>
+    <button id="exportExcel" style="
+      float:right; margin-right:8px;
+      padding:6px 12px;
+      background:#198754;color:white;
+      border:none;border-radius:4px;
+      cursor:pointer
+    ">Export Excel</button>
     <h1 style="text-align:center;margin:10px 0 16px;font-size:20px;">Püşkatma nəticəsi</h1>
     <div id="finalTabs" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 14px;"></div>
     <div id="finalDrawGrid" style="width:100%;"></div>
@@ -1318,6 +1325,57 @@ finalBtn.addEventListener("click", () => {
 });
 document.getElementById("closeOverlay").addEventListener("click", () => {
   overlay.style.display = "none";
+});
+
+// Export final draw as CSV (Excel-compatible)
+function exportFinalDrawToCSV() {
+  const sortedPotsAll = getSortedOpponentPots();
+  // Build header
+  const headers = ["Komanda"].concat(sortedPotsAll.map(p => `Sebet ${p+1}`));
+
+  // Sort teams by their pot then by name for stable output
+  const teams = Array.from(teamToPot.keys()).sort((a, b) => {
+    const pa = teamToPot.get(a) ?? 0;
+    const pb = teamToPot.get(b) ?? 0;
+    if (pa !== pb) return pa - pb;
+    return a.localeCompare(b);
+  });
+
+  function csvEscape(value) {
+    const s = String(value ?? "");
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  const rows = [headers.map(csvEscape).join(",")];
+
+  teams.forEach(team => {
+    const opps = fixtures.get(team) || new Set();
+    const row = [csvEscape(team)];
+    sortedPotsAll.forEach(p => {
+      const opp = Array.from(opps).find(o => teamToPot.get(o) === p) || "";
+      row.push(csvEscape(opp));
+    });
+    rows.push(row.join(","));
+  });
+
+  // Prepend UTF-8 BOM so Excel detects encoding properly
+  const BOM = "\uFEFF";
+  const csvContent = BOM + rows.join("\r\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  a.href = url;
+  a.download = `puskatma-neticesi-${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("exportExcel").addEventListener("click", () => {
+  exportFinalDrawToCSV();
 });
 
 // Reset button to clear persisted state
