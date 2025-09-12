@@ -695,6 +695,64 @@
     .popup-card .team-badge { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(0,0,0,0.06); background: #fff; display:flex; align-items:center; justify-content:center; }
     .popup-card .name { font-weight: 700; color: #2c3e50; }
     .popup-card .pill { margin-left: auto; background: #eafaf7; color: #0b8f7a; padding: 6px 10px; border-radius: 999px; font-size: 12px; border: 1px solid #b8efe6; box-shadow: none; animation: none; }
+    
+    /* Football-themed draw overlay */
+    .draw-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,0.05), rgba(0,0,0,0.9)),
+                  radial-gradient(800px 400px at 0% 0%, rgba(46, 204, 113, 0.15), transparent 60%),
+                  radial-gradient(800px 400px at 100% 0%, rgba(46, 204, 113, 0.15), transparent 60%),
+                  #000;
+      color: #fff;
+    }
+    .draw-stage {
+      position: relative;
+      width: min(900px, 92vw);
+      height: min(520px, 60vh);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 0 120px rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 80px),
+        linear-gradient(180deg, #136f27, #0f5a20);
+    }
+    .pitch-lines { position: absolute; inset: 0; pointer-events: none; }
+    .pitch-lines::before, .pitch-lines::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; }
+    .pitch-lines::before { width: 160px; height: 160px; }
+    .pitch-lines::after { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.85); border: none; }
+    .half-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(255,255,255,0.6); transform: translateX(-50%); }
+    .pen-area { position: absolute; width: 140px; height: 50%; top: 25%; border: 2px solid rgba(255,255,255,0.6); }
+    .pen-left { left: 14px; border-right: none; border-radius: 12px 0 0 12px; }
+    .pen-right { right: 14px; border-left: none; border-radius: 0 12px 12px 0; }
+    .stadium-light { position: absolute; width: 220px; height: 220px; border-radius: 50%; filter: blur(24px); opacity: 0.35; mix-blend-mode: screen; animation: lightPulse 2.8s ease-in-out infinite; }
+    .light-1 { left: -60px; top: -60px; background: #74ff9e; }
+    .light-2 { right: -60px; top: -60px; background: #74ff9e; animation-delay: .6s; }
+    .light-3 { left: -60px; bottom: -60px; background: #66d9ff; animation-delay: 1.2s; }
+    .light-4 { right: -60px; bottom: -60px; background: #66d9ff; animation-delay: 1.8s; }
+    @keyframes lightPulse { 0%,100%{opacity:.25; transform: scale(1);} 50%{opacity:.5; transform: scale(1.08);} }
+    .ball { position: absolute; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ffffff 0 24px, transparent 25px), radial-gradient(circle at 70% 70%, #ffffff 0 24px, transparent 25px), radial-gradient(circle at 50% 50%, #111 0 8px, #fff 9px 24px, transparent 25px); box-shadow: 0 6px 16px rgba(0,0,0,0.45); animation: ballPath 1.2s cubic-bezier(.22,.61,.36,1) infinite, spin 1.2s linear infinite; }
+    @keyframes ballPath { 0% { left: 8%; top: 78%; } 25% { left: 25%; top: 62%; } 50% { left: 50%; top: 48%; } 75% { left: 75%; top: 62%; } 100% { left: 92%; top: 78%; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .draw-title { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.18); color: #eafff5; padding: 8px 14px; border-radius: 999px; font-weight: 800; letter-spacing: .3px; text-shadow: 0 1px 2px rgba(0,0,0,.6); box-shadow: 0 6px 16px rgba(0,0,0,.25), inset 0 0 18px rgba(255,255,255,.06); font-size: 14px; }
+    .draw-sub { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 18px; opacity: .9; background: rgba(0,0,0,.35); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); }
+    .confetti-canvas { position: absolute; inset: 0; pointer-events: none; }
+
+    /* Live draw slots */
+    .draw-slots { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; width: min(720px, 90%); }
+    .slot { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; height: 110px; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 0 24px rgba(255,255,255,0.05); position: relative; }
+    .slot img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #fff; border: 2px solid rgba(255,255,255,0.3); }
+    .slot .label { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); background: rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.15); color:#eafff5; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .slot.revealed { animation: successPulse 0.6s ease; border-color: rgba(76,205,196,0.8); }
+
+    /* Smooth popup entrance */
+    .popup-animate-in { animation: popupIn .32s cubic-bezier(.22,.61,.36,1) both; }
+    @keyframes popupIn { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
   </style>
 </head>
 
@@ -972,6 +1030,11 @@
       teamBtn.innerHTML = '<span class="loading"></span>';
       teamBtn.disabled = true;
 
+      // Show football-themed loading overlay
+      if (typeof showDrawOverlay === 'function') {
+        showDrawOverlay(team);
+      }
+
       // Simulate processing time for better UX
       setTimeout(() => {
         // remove only the physically drawn team
@@ -1024,7 +1087,7 @@
         });
         selectedTeamPill.textContent = team;
 
-        // Render selected team opponents into popup
+        // Prepare popup content (but show after slot reveal)
         const teamOverlayContent = document.getElementById('teamOverlayContent');
         const teamOverlayTitle = document.getElementById('teamOverlayTitle');
         const headerLogo = document.getElementById('popupHeaderLogo');
@@ -1063,13 +1126,36 @@
         });
         oppCount.textContent = `${lines.length} rəqib`;
 
-        // Show popup
-        teamOverlay.style.display = 'flex';
-
         renderGlobalFixtures();
         saveState();
 
-      }, 500);
+        // Map opponents to their pot indices for slot reveal
+        const finalOpponentsByPot = Array(6).fill('');
+        lines.forEach(fixture => {
+          const [, opponentName] = fixture.split(' - ');
+          const pIdx = teamToPot.get(opponentName);
+          if (typeof pIdx === 'number') finalOpponentsByPot[pIdx] = opponentName;
+        });
+
+        // Reveal slots sequentially, then confetti, hide overlay, and show popup
+        if (typeof revealSlots === 'function') {
+          revealSlots(finalOpponentsByPot).then(() => {
+            confettiBurst(800);
+            setTimeout(() => {
+              drawOverlay.style.display = 'none';
+              teamOverlay.style.display = 'flex';
+              const popupCard = teamOverlay.querySelector('div');
+              if (popupCard) {
+                popupCard.classList.remove('popup-animate-in');
+                // Force reflow for consecutive animations
+                void popupCard.offsetWidth;
+                popupCard.classList.add('popup-animate-in');
+              }
+            }, 650);
+          });
+        }
+
+      }, 1200);
     }
 
     // Load persisted state if available, otherwise render fresh
@@ -1144,6 +1230,179 @@ teamOverlay.innerHTML = `
   </div>
 `;
 document.body.appendChild(teamOverlay);
+
+// Football draw overlay (pitch + ball) and confetti
+const drawOverlay = document.createElement('div');
+drawOverlay.className = 'draw-overlay';
+drawOverlay.innerHTML = `
+  <div class="draw-stage">
+    <div class="stadium-light light-1"></div>
+    <div class="stadium-light light-2"></div>
+    <div class="stadium-light light-3"></div>
+    <div class="stadium-light light-4"></div>
+    <div class="pitch-lines"></div>
+    <div class="half-line"></div>
+    <div class="pen-area pen-left"></div>
+    <div class="pen-area pen-right"></div>
+    <div class="ball"></div>
+    <div class="draw-sub" id="drawSubText">Komanda seçilir</div>
+    <div class="draw-slots" id="drawSlots"></div>
+    <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+    <div class="draw-title">İxtiyari seçim edilir...</div>
+  </div>
+`;
+document.body.appendChild(drawOverlay);
+
+const confettiCanvas = document.getElementById('confettiCanvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+
+function resizeConfettiCanvas() {
+  confettiCanvas.width = drawOverlay.clientWidth;
+  confettiCanvas.height = drawOverlay.clientHeight;
+}
+window.addEventListener('resize', resizeConfettiCanvas);
+resizeConfettiCanvas();
+
+function confettiBurst(durationMs = 700) {
+  const colors = ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#a55eea', '#ff6b6b'];
+  const particles = [];
+  const rect = drawOverlay.getBoundingClientRect();
+  const originX = rect.width / 2;
+  const originY = rect.height * 0.25;
+  const count = 120;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI - Math.PI / 2;
+    const speed = 4 + Math.random() * 6;
+    particles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 3,
+      g: 0.12 + Math.random() * 0.12,
+      w: 6 + Math.random() * 6,
+      h: 8 + Math.random() * 12,
+      r: Math.random() * Math.PI,
+      vr: (-0.2 + Math.random() * 0.4),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+    });
+  }
+  let rafId;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    particles.forEach(p => {
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r += p.vr;
+      p.alpha = Math.max(0, 1 - elapsed / (durationMs + 400));
+      confettiCtx.save();
+      confettiCtx.globalAlpha = p.alpha;
+      confettiCtx.translate(p.x, p.y);
+      confettiCtx.rotate(p.r);
+      confettiCtx.fillStyle = p.color;
+      confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      confettiCtx.restore();
+    });
+    if (elapsed < durationMs) {
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+  rafId = requestAnimationFrame(tick);
+  setTimeout(() => cancelAnimationFrame(rafId), durationMs + 50);
+}
+
+function showDrawOverlay(teamName) {
+  const sub = document.getElementById('drawSubText');
+  if (sub) sub.textContent = `${teamName}`;
+  drawOverlay.style.display = 'flex';
+  populateSlots(teamName);
+  startSlotSpin(teamName);
+}
+
+function hideDrawOverlay() {
+  // Fire confetti then hide shortly after
+  confettiBurst(800);
+  setTimeout(() => { drawOverlay.style.display = 'none'; }, 650);
+}
+
+// --- Live draw slots helpers ---
+function populateSlots(selectedTeam) {
+  const slots = document.getElementById('drawSlots');
+  if (!slots) return;
+  slots.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.dataset.pot = String(i);
+    const img = document.createElement('img');
+    img.alt = 'spinning';
+    img.src = '';
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = `Səbət ${i + 1}`;
+    slot.appendChild(img);
+    slot.appendChild(label);
+    slots.appendChild(slot);
+  }
+}
+
+let slotIntervals = [];
+function startSlotSpin(selectedTeam) {
+  stopSlotSpin();
+  const slots = Array.from(document.querySelectorAll('.slot'));
+  slots.forEach(slot => slot.classList.remove('revealed'));
+  slots.forEach((slot) => {
+    const potIdx = Number(slot.dataset.pot || 0);
+    const img = slot.querySelector('img');
+    const pool = (originalPots[potIdx] || []).filter(n => n !== selectedTeam);
+    if (!pool.length) return;
+    let k = 0;
+    const id = setInterval(() => {
+      k = (k + 1) % pool.length;
+      const name = pool[k];
+      if (img) {
+        img.src = `yeni-logolar/${name}.png`;
+        img.alt = name;
+      }
+    }, 90 + Math.random() * 80);
+    slotIntervals.push(id);
+  });
+}
+
+function stopSlotSpin() {
+  if (!slotIntervals) return;
+  slotIntervals.forEach(id => clearInterval(id));
+  slotIntervals = [];
+}
+
+// Reveal each slot to the final opponent logo sequentially
+function revealSlots(opponentsByPot) {
+  return new Promise(resolve => {
+    const slots = Array.from(document.querySelectorAll('.slot'));
+    let idx = 0;
+    function revealNext() {
+      if (idx >= 6) {
+        stopSlotSpin();
+        resolve();
+        return;
+      }
+      const slot = slots[idx];
+      const finalName = opponentsByPot[idx] || '';
+      const img = slot.querySelector('img');
+      if (finalName && img) {
+        img.src = `yeni-logolar/${finalName}.png`;
+        img.alt = finalName;
+      }
+      slot.classList.add('revealed');
+      idx++;
+      setTimeout(revealNext, 220);
+    }
+    revealNext();
+  });
+}
 
 function getSortedOpponentPots() {
   const opponentPots = new Set();
