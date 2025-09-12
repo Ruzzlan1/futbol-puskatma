@@ -9,6 +9,9 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      /* overflow: scroll;
+      scrollbar-width: none; 
+     -ms-overflow-style: none;   */
     }
 
     body {
@@ -406,7 +409,8 @@
     .team-fixture-opponents {
       padding: 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      /* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); */
+      grid-template-columns: repeat(3, minmax(200px, 1fr));
       gap: 15px;
     }
 
@@ -1103,6 +1107,7 @@ overlay.innerHTML = `
       cursor:pointer
     ">X</button>
     <h1 style="text-align:center;margin:10px 0 16px;font-size:20px;">Püşkatma nəticəsi</h1>
+    <div id="finalTabs" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 14px;"></div>
     <div id="finalDrawGrid" style="width:100%;"></div>
   </div>
 `;
@@ -1121,7 +1126,7 @@ teamOverlay.style.cssText = `
 `;
 
 teamOverlay.innerHTML = `
-  <div style="background:#ffffff; color:#222; border-radius:14px; padding:20px; width:min(900px,95vw); max-height:85vh; overflow:auto;">
+  <div style="background:#ffffff; color:#222; border-radius:14px; padding:20px; width:min(1450px,95vw); max-height:95vh; overflow:auto;">
     <div class=\"popup-header\">
       <div class=\"team-badge\"><img id=\"popupHeaderLogo\" src=\"\" alt=\"\" style=\"width:100%;height:100%;object-fit:cover;\"/></div>
       <div class=\"team-name\" id=\"teamOverlayTitle\">Komanda</div>
@@ -1133,14 +1138,46 @@ teamOverlay.innerHTML = `
 `;
 document.body.appendChild(teamOverlay);
 
-function renderFinalDraw() {
+function getSortedOpponentPots() {
+  const opponentPots = new Set();
+  fixtures.forEach(opps => opps.forEach(op => opponentPots.add(teamToPot.get(op))));
+  return Array.from(opponentPots).sort((a,b)=>a-b);
+}
+
+function renderTabs(activePot = null) {
+  const tabs = document.getElementById("finalTabs");
+  if (!tabs) return;
+  const sortedPots = getSortedOpponentPots();
+  tabs.innerHTML = '';
+
+  function makeBtn(label, potValue) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.style.cssText = `
+      padding:6px 10px;border-radius:999px;border:1px solid #2d2d2d;cursor:pointer;
+      background:${(potValue===activePot || (potValue===null && activePot===null)) ? '#1e6f34' : '#0e0e0e'};
+      color:${(potValue===activePot || (potValue===null && activePot===null)) ? '#fff' : '#9be07e'}; font-weight:700; font-size:12px;
+    `;
+    btn.addEventListener('click', () => {
+      renderTabs(potValue);
+      renderFinalDraw({ rowPot: potValue, colPot: null });
+    });
+    return btn;
+  }
+
+  tabs.appendChild(makeBtn('Hamısı', null));
+  sortedPots.forEach(p => tabs.appendChild(makeBtn(`Səbət ${p+1}`, p)));
+}
+
+function renderFinalDraw(opts = {}) {
+  const rowPot = (opts && typeof opts.rowPot === 'number') ? opts.rowPot : null;
+  const colPot = (opts && typeof opts.colPot === 'number') ? opts.colPot : null;
   const grid = document.getElementById("finalDrawGrid");
   grid.innerHTML = "";
 
   // Opponent pots
-  const opponentPots = new Set();
-  fixtures.forEach(opps => opps.forEach(op => opponentPots.add(teamToPot.get(op))));
-  const sortedPots = Array.from(opponentPots).sort((a,b)=>a-b);
+  const sortedPotsAll = getSortedOpponentPots();
+  const sortedPots = colPot === null ? sortedPotsAll : sortedPotsAll.filter(p => p === colPot);
 
   // Visual accents per pot
   const potColors = ['#27ae60','#16a085','#2980b9','#8e44ad','#e67e22','#c0392b'];
@@ -1166,13 +1203,15 @@ function renderFinalDraw() {
   // Header row
   const emptyHeader = document.createElement("div");
   emptyHeader.textContent = "Komanda / Rəqib";
-  emptyHeader.style.cssText = "background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid #27ae60;";
+  emptyHeader.style.cssText = "background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid #27ae60;cursor:pointer;";
+  emptyHeader.addEventListener('click', () => { renderTabs(null); renderFinalDraw({ rowPot: null, colPot: null }); });
   table.appendChild(emptyHeader);
 
   sortedPots.forEach((potNum, idx) => {
     const th = document.createElement("div");
     th.textContent = `Səbət ${potNum + 1}`;
-    th.style.cssText = `background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid ${potColors[idx % potColors.length]};`;
+    th.style.cssText = `background:#0e0e0e;color:#9be07e;font-weight:700;padding:8px;text-align:center;font-size:14px;border-top:3px solid ${potColors[idx % potColors.length]};cursor:pointer;`;
+    th.addEventListener('click', () => { renderFinalDraw({ rowPot: potNum, colPot: null }); });
     table.appendChild(th);
   });
 
@@ -1186,6 +1225,7 @@ function renderFinalDraw() {
 
   // Body rows
   sortedTeamPots.forEach(potNum => {
+    if (rowPot !== null && Number(potNum) !== rowPot) return;
     // Pot header row
     const potHeader = document.createElement("div");
     potHeader.textContent = `Səbət ${Number(potNum)+1}`;
@@ -1272,7 +1312,8 @@ function renderFinalDraw() {
 
 // 4. Event listeners
 finalBtn.addEventListener("click", () => {
-  renderFinalDraw();
+  renderTabs(null);
+  renderFinalDraw({ rowPot: null, colPot: null });
   overlay.style.display = "flex";
 });
 document.getElementById("closeOverlay").addEventListener("click", () => {
@@ -1292,6 +1333,21 @@ resetBtn.addEventListener('click', () => {
 
 document.getElementById("closeTeamOverlay").addEventListener("click", () => {
   teamOverlay.style.display = "none";
+});
+
+
+// Close popups with Escape key as well
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    // Close team details overlay if open
+    if (teamOverlay && teamOverlay.style.display === 'flex') {
+      teamOverlay.style.display = 'none';
+    }
+    // Close final results overlay if open
+    if (overlay && overlay.style.display === 'flex') {
+      overlay.style.display = 'none';
+    }
+  }
 });
 
 
